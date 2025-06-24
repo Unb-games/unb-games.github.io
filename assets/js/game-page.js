@@ -259,19 +259,54 @@ function updateGameStats(game) {
 
 function loadGame(game) {
   const gameFrame = document.getElementById("gameFrame");
+  const gameFrameContainer = document.querySelector(".game-frame");
   const gameLoading = document.getElementById("gameLoading");
 
-  if (!gameFrame || !gameLoading) {
+  if (!gameFrame || !gameLoading || !gameFrameContainer) {
     console.error("Game frame elements not found");
     return;
   }
 
   try {
     // Set up iframe with proper attributes
+    
+    // Auto-populate URL from games data if empty
+    if (!game.url && window.gamesData && game.id) {
+      const realGameData = window.gamesData.find(g => g.id === game.id);
+      if (realGameData && realGameData.url) {
+        game.url = realGameData.url;
+        game.category = realGameData.category || game.category;
+        game.thumb = realGameData.thumb || game.thumb;
+        console.log('Auto-populated URL for game:', game.title);
+      }
+    }
+    
+    // Set aspect ratio class based on game dimensions
+    const width = parseInt(game.width) || 800;
+    const height = parseInt(game.height) || 600;
+    const aspectRatio = width / height;
+    
+    // Remove existing aspect ratio classes
+    gameFrameContainer.classList.remove('portrait', 'landscape', 'square');
+    
+    // Add appropriate class based on aspect ratio
+    if (aspectRatio < 0.8) {
+      gameFrameContainer.classList.add('portrait');
+      console.log('Game is portrait:', width + 'x' + height);
+    } else if (aspectRatio > 1.3) {
+      gameFrameContainer.classList.add('landscape');
+      console.log('Game is landscape:', width + 'x' + height);
+    } else {
+      gameFrameContainer.classList.add('square');
+      console.log('Game is square/standard:', width + 'x' + height);
+    }
+    
     gameFrame.src = game.url;
-    gameFrame.width = game.width || "800";
-    gameFrame.height = game.height || "600";
     gameFrame.title = `Play ${game.title}`;
+    
+    // Remove any explicit width/height attributes to let CSS handle sizing
+    gameFrame.removeAttribute('width');
+    gameFrame.removeAttribute('height');
 
     // Show loading initially
     gameLoading.style.display = "flex";

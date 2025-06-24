@@ -530,6 +530,20 @@ body {
   overflow: hidden;
 }
 
+/* Responsive game frame that adjusts to game aspect ratio */
+.game-frame.portrait {
+  height: 700px;
+  max-height: 80vh;
+}
+
+.game-frame.landscape {
+  height: 500px;
+}
+
+.game-frame.square {
+  height: 600px;
+}
+
 .game-frame iframe {
   width: 100%;
   height: 100%;
@@ -756,6 +770,14 @@ body {
   .game-frame {
     height: 400px;
   }
+  
+  .game-frame.portrait {
+    height: 500px;
+  }
+  
+  .game-frame.landscape {
+    height: 350px;
+  }
 
   .game-header {
     flex-direction: column;
@@ -774,7 +796,7 @@ body {
   }
 
   .game-frame iframe {
-    height: 400px;
+    height: 100%;
   }
 
   .game-details {
