@@ -326,6 +326,7 @@ function showGameError() {
 
 function loadRelatedGames(currentGame) {
   const relatedGamesContainer = document.getElementById("relatedGames");
+  const debugContainer = document.getElementById("relatedGamesDebug");
 
   if (!relatedGamesContainer || !gamesDataReady) {
     console.warn("Related games container not found or data not ready");
@@ -333,23 +334,47 @@ function loadRelatedGames(currentGame) {
   }
 
   try {
+    console.log("Loading related games for:", currentGame.title);
+    
     // Get games from the same category, excluding current game
     let relatedGames = getGamesByCategory(currentGame.category)
       .filter(game => game.id !== currentGame.id);
+    
+    console.log("Found games in same category:", relatedGames.length);
 
     // If not enough games in same category, add random games
-    if (relatedGames.length < 4) {
-      const additionalGames = getRandomGames(4 - relatedGames.length, currentGame.id);
+    if (relatedGames.length < 12) {
+      const additionalGames = getRandomGames(12 - relatedGames.length, currentGame.id);
+      console.log("Adding additional random games:", additionalGames.length);
       relatedGames = [...relatedGames, ...additionalGames];
     }
 
-    // Limit to 4 games
-    relatedGames = relatedGames.slice(0, 4);
+    // Limit to 12 games
+    relatedGames = relatedGames.slice(0, 12);
+    console.log("Final number of related games:", relatedGames.length);
+
+    // Show debug info
+    if (debugContainer) {
+      debugContainer.style.display = "block";
+      debugContainer.innerHTML = `
+        <div style="background: #f0f9ff; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 12px;">
+          <p>Related games count: ${relatedGames.length}</p>
+          <p>Game titles: ${relatedGames.map(g => g.title).join(', ')}</p>
+        </div>
+      `;
+    }
 
     // Create related games HTML with improved error handling
     relatedGamesContainer.innerHTML = relatedGames
       .map(game => createRelatedGameCard(game))
       .join("");
+    
+    // Re-append the debug container if it was removed
+    if (debugContainer) {
+      relatedGamesContainer.appendChild(debugContainer);
+    }
+    
+    console.log("Related games HTML created with", relatedGamesContainer.children.length, "elements");
 
   } catch (error) {
     console.error("Error loading related games:", error);
@@ -362,11 +387,8 @@ function loadRelatedGames(currentGame) {
 }
 
 function createRelatedGameCard(game) {
-  const platform = getGamePlatform(game);
-  const platformBadge = `<span class="platform-badge platform-${platform}">${getPlatformLabel(platform)}</span>`;
-  
   return `
-    <div class="game-card">
+    <div class="game-card" onclick="playGame('${game.id}')">
       <img src="${game.thumb || ''}" 
            alt="${game.title || 'Game'}" 
            class="game-thumbnail" 
@@ -374,11 +396,6 @@ function createRelatedGameCard(game) {
            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfjoYgTm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
       <div class="game-content">
         <h4 class="game-title">${game.title || 'Untitled Game'}</h4>
-        <div class="game-meta">
-          <span class="game-category">${game.category || 'Game'}</span>
-          ${platformBadge}
-        </div>
-        <button class="play-btn" onclick="playGame('${game.id}')">Play Now</button>
       </div>
     </div>
   `;
@@ -429,7 +446,7 @@ function getGamesByCategory(category) {
   return window.gamesData.filter(game => game.category === category);
 }
 
-function getRandomGames(count = 4, excludeId = null) {
+function getRandomGames(count = 12, excludeId = null) {
   if (!window.gamesData) return [];
   
   const availableGames = excludeId 
@@ -507,7 +524,13 @@ function getPlatformLabel(platform) {
 
 function playGame(gameId) {
   if (gameId) {
-    window.location.href = `game.html?id=${gameId}`;
+    // Use the gameIdToFilename mapping to get the filename
+    if (window.gameIdToFilename && window.gameIdToFilename[gameId]) {
+      window.location.href = `games/${window.gameIdToFilename[gameId]}`;
+    } else {
+      // Fallback to the old method if the mapping doesn't exist
+      window.location.href = `game.html?id=${gameId}`;
+    }
   }
 }
 

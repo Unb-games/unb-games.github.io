@@ -269,30 +269,11 @@ function showErrorMessage(message) {
 
 function createGameCard(game) {
   try {
-    const truncatedDescription = game.description && game.description.length > 150 
-      ? game.description.substring(0, 150) + "..." 
-      : (game.description || "No description available")
-
-    const tags = game.tags && typeof game.tags === 'string' 
-      ? game.tags.split(", ").slice(0, 3).join(", ")
-      : "No tags"
-
-    // Add platform badge based on detection
-    const detectedPlatform = getGamePlatform(game)
-    const platformBadge = `<span class="platform-badge platform-${detectedPlatform}">${getPlatformLabel(detectedPlatform)}</span>`
-
     return `
-      <div class="game-card" data-category="${game.category || 'Unknown'}" data-platform="${detectedPlatform}">
+      <div class="game-card" onclick="playGame('${game.id}')">
         <img src="${game.thumb || ''}" alt="${game.title || 'Game'}" class="game-thumbnail" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPvCfjoYgTm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
         <div class="game-content">
           <h3 class="game-title">${game.title || 'Untitled Game'}</h3>
-          <p class="game-description">${truncatedDescription}</p>
-          <div class="game-meta">
-            <span class="game-category">${game.category || 'Unknown'}</span>
-            ${platformBadge}
-            <span class="game-tags">${tags}</span>
-          </div>
-          <button class="play-btn" onclick="playGame('${game.id}')">Play Now</button>
         </div>
       </div>
     `
@@ -301,8 +282,7 @@ function createGameCard(game) {
     return `
       <div class="game-card">
         <div class="game-content">
-          <h3>Error loading game</h3>
-          <p>There was an error loading this game card.</p>
+          <h3 class="game-title">Error loading game</h3>
         </div>
       </div>
     `
@@ -402,7 +382,13 @@ function getGamePlatform(game) {
 function playGame(gameId) {
   const game = getGameById(gameId)
   if (game) {
-    window.location.href = `game.html?id=${gameId}`
+    // Use the gameIdToFilename mapping to get the filename
+    if (window.gameIdToFilename && window.gameIdToFilename[gameId]) {
+      window.location.href = `games/${window.gameIdToFilename[gameId]}`
+    } else {
+      // Fallback to the old method if the mapping doesn't exist
+      window.location.href = `game.html?id=${gameId}`
+    }
   }
 }
 
@@ -414,7 +400,7 @@ function getGamesByCategory(category) {
   return localGamesData.filter(game => game.category === category)
 }
 
-function getRandomGames(count = 4, excludeId = null) {
+function getRandomGames(count = 12, excludeId = null) {
   const availableGames = excludeId 
     ? localGamesData.filter(game => game.id !== excludeId)
     : localGamesData

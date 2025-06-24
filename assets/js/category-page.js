@@ -55,13 +55,13 @@ function waitForGamesData(callback) {
   const maxAttempts = 50
   
   function checkData() {
-    if (window.gamesData && window.gamesData.length > 0) {
+    if (window.gamesData && window.gamesData.length > 0 && window.gameIdToFilename) {
       callback()
     } else if (attempts < maxAttempts) {
       attempts++
       setTimeout(checkData, 100)
     } else {
-      console.error("Games data not available after waiting")
+      console.error("Games data or filename mapping not available after waiting")
       displayError()
     }
   }
@@ -92,17 +92,11 @@ function displayCategoryGames(games) {
 }
 
 function createCategoryGameCard(game) {
-  const truncatedDescription = game.description && game.description.length > 120 
-    ? game.description.substring(0, 120) + "..." 
-    : (game.description || "Play this exciting game now!")
-
-  const tags = game.tags ? game.tags.split(", ").slice(0, 3).join(", ") : ""
-  
   // Create fallback image with base64 encoded SVG
   const fallbackImage = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjZjNmNGY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIzMCIgZmlsbD0iIzk5YTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+OrgpQbGF5PC90ZXh0Pgo8dGV4dCB4PSIxMDAiIHk9IjkwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2YjczODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K"
 
   return `
-        <div class="game-card">
+        <div class="game-card" onclick="playGame('${game.id}')">
             <img src="${game.thumb || fallbackImage}" 
                  alt="${game.title}" 
                  class="game-thumbnail" 
@@ -110,20 +104,19 @@ function createCategoryGameCard(game) {
                  onerror="this.src='${fallbackImage}'">
             <div class="game-content">
                 <h3 class="game-title">${game.title}</h3>
-                <p class="game-description">${truncatedDescription}</p>
-                <div class="game-meta">
-                    <span class="game-category">${game.category}</span>
-                    ${tags ? `<span class="game-tags">${tags}</span>` : ''}
-                </div>
-                <button class="play-btn" onclick="playGame('${game.id}')">Play Now</button>
             </div>
         </div>
     `
 }
 
 function playGame(gameId) {
-  // Redirect to game page with game ID
-  window.location.href = `../game.html?id=${gameId}`
+  // Use the gameIdToFilename mapping to get the filename
+  if (window.gameIdToFilename && window.gameIdToFilename[gameId]) {
+    window.location.href = `../games/${window.gameIdToFilename[gameId]}`
+  } else {
+    // Fallback to the old method if the mapping doesn't exist
+    window.location.href = `../game.html?id=${gameId}`
+  }
 }
 
 // Use the actual games data from window.gamesData
