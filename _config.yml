@@ -1,0 +1,64 @@
+# Jekyll configuration for GitHub Pages
+# This fixes the trailing slash 404 issue
+
+# Site settings
+title: "Unblocked Games - Free Online HTML5 Games"
+description: "Play 10,000+ free HTML5 games online instantly! Action, racing, puzzles, girls games, shooting, and more. Mobile-friendly, no downloads required."
+baseurl: ""
+url: "https://unb-games.github.io"
+
+# GitHub Pages settings
+github:
+  repository_name: "unb-games.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# Collections
+collections:
+  games:
+    output: true
+    permalink: /games/:name/
+
+# Default layout
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Plugins
+plugins:
+  - jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - gemfiles
+  - README.md
+
+# Include files
+include:
+  - _pages
+
+# Permalink style
+permalink: pretty
+
+# Sass configuration
+sass:
+  style: compressed
+
+# Security
+safe: true 
