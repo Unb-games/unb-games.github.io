@@ -1,19 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap
 Sitemap: https://unb-games.github.io/sitemap.xml
-
-# Crawl-delay for polite crawling
-Crawl-delay: 1
-
-# Allow all search engines to index the site
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-# Block access to admin or private directories if any
-# Disallow: /admin/
-# Disallow: /private/
